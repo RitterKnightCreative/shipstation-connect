@@ -1,6 +1,7 @@
 <?php
 namespace fostercommerce\shipstationconnect\services;
 
+use Craft;
 use fostercommerce\shipstationconnect\Plugin;
 use craft\commerce\Plugin as CommercePlugin;
 use craft\commerce\elements\Order;
@@ -24,10 +25,15 @@ class Xml extends Component {
      * @return SimpleXMLElement
      */
     public function orders(\SimpleXMLElement $xml, $orders, $name='Orders') {
+	    
+
         $orders_xml = $xml->getName() == $name ? $xml : $xml->addChild($name);
         foreach ($orders as $order) {
             if ($this->shouldInclude($order)) {
-                $this->order($orders_xml, $order);
+              $orders_xml =   $this->order($orders_xml, $order);
+
+            } else {
+
             }
         }
 
@@ -42,7 +48,9 @@ class Xml extends Component {
      * @param String $name the name of the child node, default 'Order'
      * @return SimpleXMLElement
      */
-    public function order(\SimpleXMLElement $xml, Order $order, $name='Order') {
+    public function order(\SimpleXMLElement $xml, $order, $name='Order') {
+	   
+
         $order_xml = $xml->getName() == $name ? $xml : $xml->addChild($name);
 
         $order_mapping = ['OrderID'         => ['callback' => function($order) {
@@ -68,6 +76,7 @@ class Xml extends Component {
         $this->shippingMethod($order_xml, $order);
 
         $paymentSource = $order->getPaymentSource();
+        
         if ($paymentSource && $paymentObj = $paymentSource->description) {
             $this->addChildWithCDATA($order_xml, 'PaymentMethod', $paymentObj->name);
         }
